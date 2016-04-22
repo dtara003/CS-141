@@ -51,8 +51,6 @@ def Write_to_File(filename, s):
     # new line
     output.write('\n')
 
-t1 = time.clock()
-
 def Brute_Force(all):
     # give minimum distance a starting value
     minimum = float("inf")
@@ -70,8 +68,6 @@ def Brute_Force(all):
                 # print '\n'
                 minimum = temp
     return minimum
-
-t2 = time.clock()
 
 def Div(all):
     # cannot determine minimum distance with only one or zero points
@@ -121,8 +117,6 @@ def Div(all):
                         d = temp
     return d
 
-t4 = time.clock()
-
 # read in points from file
 list = Read_Points_From_Command_Line_File()
 
@@ -132,6 +126,18 @@ file = file[0:len(file)-4]
 file = file + "_distance.txt"
 
 # TODO: modify to only output result not twice
-output = str(Brute_Force(list)) + ' ' + str(Div(list))
+start1 = timeit.default_timer()
+BF = Brute_Force(list)
+stop1 = timeit.default_timer()
+
+start2 = timeit.default_timer()
+DC = Div(list)
+stop2 = timeit.default_timer()
+
+output = str(BF) + ' ' + str(DC)
 # create and write to file
 Write_to_File(file, output)
+
+# check timers
+print stop1 - start1
+print stop2 - start2
