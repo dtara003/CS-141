@@ -8,7 +8,7 @@ I certify that all work shown is my own.
 """
 
 import sys
-import time
+import timeit
 import math
 
 class Point :
