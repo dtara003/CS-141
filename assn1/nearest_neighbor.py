@@ -1,4 +1,14 @@
+"""
+.
+Author: Dharti Tarapara
+Date: 4/22/16
+.
+I certify that all work shown is my own.
+.
+"""
+
 import sys
+import time
 import math
 
 class Point :
@@ -6,7 +16,7 @@ class Point :
     def __init__(self, x_val, y_val):
         self.x = x_val
         self.y = y_val
-    # TODO: not used?
+    # TODO: figure out wtf this is
     def __repr__(self):
         return "(%.2f, %.2f)" % (self.x, self.y)
 
@@ -41,12 +51,11 @@ def Write_to_File(filename, s):
     # new line
     output.write('\n')
 
+t1 = time.clock()
+
 def Brute_Force(all):
     # give minimum distance a starting value
-        # max = (500, 500) and min = (-500, -500) according to generate_test.py
-        # maximum distance therefore 1004.98756211
-        # set maximum to 10000 instead of 1005 just in case shit goes south
-    minimum = 10000
+    minimum = float("inf")
     # go through array replace minimum if smaller value found
     # first two points checked twice but WHATEVER MAN
     for i in range(0, len(all)):
@@ -60,28 +69,69 @@ def Brute_Force(all):
                 # print all[i].x, ', ', all[i].y, '     ', all[j].x, ', ', all[j].y
                 # print '\n'
                 minimum = temp
-
     return minimum
 
-def Div_Conq(all):
+t2 = time.clock()
+
+def Div(all):
+    # cannot determine minimum distance with only one or zero points
+    if len(all) < 2:
+        return float("inf")
+    # if ony two points return distance
+    if len(all) == 2:
+        return math.sqrt(((all[0].y - all[1].y) ** 2) + ((all[0].x - all[1].x) ** 2))
     # sort array by x coordinates
-    # TODO: do we have to sort by y coordinates as well?
-    # all.sort(axis=0)
-    arr = sorted(all, key=lambda Point: Point.x)
-    # check
-    print arr
-    # for now
-    return 0
+        # not necessary to do within recursive calls, can be done before call to Div function
+    all = sorted(all, key = lambda Point: Point.x)
+    # middle point in array
+    mid = len(all) / 2
+    # make left array everything up to but not including the midpoint
+    left = Div(all[:mid])
+    # make right array everything from the midpoint to the end
+    right = Div(all[mid:])
+    # minimum of both left and right minimum distances
+    d = min(left, right)
+    # lower bound covers everything -d distance from midpoint horizontally
+    lower = all[mid].x - d
+    # upper bound covers everything d distance from midpoint horizontally
+    upper = all[mid].x + d
+    # finding start and end of bounded portion of array
+    start = 0
+    stop = 0
+    for i in range(0, len(all)):
+        if all[i].x < lower:
+            start += 1
+        elif all[i].x > upper:
+            stop += 1
+    bounded = all[start:len(all) - stop]
+    # sort bounded array by y coordinates to find 7 closest points in bounded section
+    bounded = sorted(bounded, key=lambda Point: Point.y)
+    # compare each point to the a maximum of 7 points in front of it for bounded minimum distance
+        # modification of brute force
+        # outer loop is O(n)
+        # inner loop will only execute a maximum of 7 times for every point in array
+            # replaces inner O(n) loop with constant runtime and makes loops linear
+    for i in range(0, len(bounded)):
+        for j in range(1, 8):
+            # prevent j from going out of range or from comparing a point with itself or ones before it
+            if j < len(bounded):
+                if j > i:
+                    temp = math.sqrt(((bounded[i].y - bounded[j].y) ** 2) + ((bounded[i].x - bounded[j].x) ** 2))
+                    if temp < d:
+                        d = temp
+    return d
 
-# --------------------------------------------------------------------------------
+t4 = time.clock()
 
+# read in points from file
 list = Read_Points_From_Command_Line_File()
-# print list
-# Write_to_File("output.txt", list)
 
-# --------------------------------------------------------------------------------
+# isolate input file name and create output file name
+file = sys.argv[1]
+file = file[0:len(file)-4]
+file = file + "_distance.txt"
 
-print 'Brute Force - shortest distance: ', Brute_Force(list)
-# print 'Divide and Conquer - shortest distance: '
-
-Div_Conq(list)
+# TODO: modify to only output result not twice
+output = str(Brute_Force(list)) + ' ' + str(Div(list))
+# create and write to file
+Write_to_File(file, output)
