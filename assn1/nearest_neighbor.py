@@ -44,7 +44,6 @@ def Read_Points_From_Command_Line_File():
 
 def Write_to_File(filename, s):
     # open output file
-    # TODO: what do the 'r' (line 23) and 'w' do? assumption: read and write?
     output = open(filename, 'w')
     # write array of points to file
     output.write(str(s))
@@ -119,25 +118,20 @@ def Div(all):
 
 # read in points from file
 list = Read_Points_From_Command_Line_File()
-
 # isolate input file name and create output file name
 file = sys.argv[1]
 file = file[0:len(file)-4]
 file = file + "_distance.txt"
-
-# TODO: modify to only output result not twice
-start1 = timeit.default_timer()
+# time brute force
+start = timeit.default_timer() # time.clock()
 BF = Brute_Force(list)
-stop1 = timeit.default_timer()
-
+stop = timeit.default_timer()
+# time divide and conquer
 start2 = timeit.default_timer()
 DC = Div(list)
 stop2 = timeit.default_timer()
-
-output = str(BF) + ' ' + str(DC)
 # create and write to file
-Write_to_File(file, output)
-
-# check timers
-print stop1 - start1
+Write_to_File(file, DC)
+# print runtimes
+print stop - start
 print stop2 - start2
